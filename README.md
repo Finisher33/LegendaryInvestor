@@ -1,7 +1,14 @@
 # LegendaryInvestor — 5인의 거장
 
 > 5인의 거장(Five Legends) 패널이 자신의 철학으로 미국 주식을 진단하는 AI 투자 시뮬레이션
-> 위치: `C:\뭉\Legendary Investor\`
+
+| 항목 | 링크 |
+| --- | --- |
+| 🌐 라이브 | https://legendaryinvestor.vercel.app |
+| 📦 GitHub | https://github.com/Finisher33/LegendaryInvestor |
+| 📁 로컬 | `C:\뭉\Legendary Investor\` |
+
+`main` 브랜치에 push하면 Vercel이 자동으로 production 배포합니다.
 
 미국 주식 티커를 입력하면 워렌 버핏 · 피터 린치 · 레이 달리오 · 스탠리 드러켄밀러 · 벤자민 그레이엄
 다섯 명의 전설적 투자자가 각자의 철학으로 진단하는 AI 투자 패널 앱.
