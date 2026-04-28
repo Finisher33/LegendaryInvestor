@@ -13,20 +13,21 @@ export function PanelCard({ panel, onClick, selected }: Props) {
   return (
     <button
       onClick={onClick}
-      className={`text-left card p-4 hover:bg-slate-800/40 transition flex flex-col gap-3 ${
-        selected ? 'ring-2 ring-amber-500/60' : ''
+      aria-pressed={selected}
+      className={`text-left card p-3.5 sm:p-4 hover:bg-slate-800/40 hover:border-slate-600 flex flex-col gap-3 ${
+        selected ? 'ring-2 ring-amber-500/60 border-amber-500/40' : ''
       }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`w-10 h-10 rounded-full grid place-items-center text-lg shrink-0 border ${p.badgeBg} ${p.themeColor}`}
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full grid place-items-center text-lg shrink-0 border ${p.badgeBg} ${p.themeColor}`}
         >
           {p.symbol}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="text-sm font-semibold truncate">{p.nameKo}</div>
-            <div className="text-[10px] text-slate-500 truncate">{p.nameEn}</div>
+            <div className="text-[10px] text-slate-500 truncate hidden sm:block">{p.nameEn}</div>
           </div>
           <div className="text-[11px] text-slate-500 truncate">{p.philosophyKo}</div>
         </div>
@@ -73,14 +74,15 @@ export function PanelCard({ panel, onClick, selected }: Props) {
         </div>
       )}
 
-      <div className="text-xs text-slate-300 leading-relaxed line-clamp-3 min-h-[3.5em]">
+      <div className="text-[13px] sm:text-xs text-slate-300 leading-relaxed line-clamp-3 min-h-[3.5em]">
         {panel.headline}
       </div>
 
-      {/* Score bar */}
+      {/* Score bar — 등장 시 width 0 → score% 트윈 */}
       <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full ${
+          key={panel.score}
+          className={`score-bar h-full rounded-full ${
             panel.verdict === 'POSITIVE'
               ? 'bg-emerald-400'
               : panel.verdict === 'NEUTRAL'

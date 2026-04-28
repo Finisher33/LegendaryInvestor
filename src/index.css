@@ -18,13 +18,31 @@
   --color-gold: #fbbf24;
   --color-gold-soft: #78350f;
 
-  --font-display: "Inter", "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* 산세리프 통일 — Pretendard Variable이 한글 + Latin 모두 커버 */
+  --font-display:
+    "Pretendard Variable", "Pretendard",
+    -apple-system, BlinkMacSystemFont, system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
 @layer base {
   html, body, #root {
     height: 100%;
+  }
+  html {
+    /* 한글은 자동 단어 단위 줄바꿈이 어색하니 keep-all + overflow-wrap break-word 조합 */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* 16px 기본 — 모바일에서 너무 크지 않도록 14px 베이스 + 본문 14px, 헤딩에서 키움 */
+    font-size: 15px;
+  }
+  @media (min-width: 640px) {
+    html { font-size: 16px; }
   }
   body {
     background:
@@ -33,12 +51,41 @@
       var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-display);
-    font-feature-settings: "ss01", "ss02", "cv11";
+    font-feature-settings: "ss01", "ss03", "cv11", "tnum";
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* iOS Safari 탭 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
   }
+  /* 모노 폰트는 명시적으로만 — 영문 숫자 영역 전용 */
+  .font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
   ::selection {
     background: var(--color-gold);
     color: #0b1120;
+  }
+  /* 포커스 링: 키보드 사용자만 강조, 마우스/터치는 잔잔하게 */
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  button, [role="button"] {
+    /* 탭 피드백 — 모든 인터랙티브에 일괄 적용 */
+    transition: transform 120ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    touch-action: manipulation;
+  }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.97);
+  }
+  /* iOS — input zoom 방지 (16px 미만에서 자동 줌 발생) */
+  input, textarea, select {
+    font-size: 16px;
+    font-family: inherit;
+  }
+  @media (min-width: 640px) {
+    input, textarea, select { font-size: inherit; }
   }
 }
 
@@ -47,6 +94,7 @@
     background: var(--color-card);
     border: 1px solid var(--color-border);
     border-radius: 1rem;
+    transition: border-color 200ms ease, background-color 200ms ease, transform 200ms ease;
   }
   .verdict-pos { color: var(--color-positive); }
   .verdict-neu { color: var(--color-neutral); }
@@ -61,11 +109,43 @@
     font-weight: 500;
     border: 1px solid var(--color-border);
     background: var(--color-bg-soft);
+    white-space: nowrap;
   }
   .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: var(--color-border);
     border-radius: 3px;
+  }
+  /* 점수 바 등장 애니메이션 — width를 0→target으로 트윈 */
+  .score-bar { animation: scoreFill 700ms cubic-bezier(.2,.8,.2,1) both; transform-origin: left center; }
+  @keyframes scoreFill {
+    from { width: 0% !important; }
+  }
+  /* 결과 화면 등장 페이드 — Tailwind 키프레임 대체 */
+  .fade-in { animation: fadeIn 320ms ease-out both; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* 가로 스크롤 컨테이너 — 우측 페이드 인디케이터 */
+  .scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .scroll-x::-webkit-scrollbar { height: 4px; }
+  .scroll-x::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+  .scroll-x-fade {
+    position: relative;
+  }
+  .scroll-x-fade::after {
+    content: "";
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 24px;
+    background: linear-gradient(to left, var(--color-bg), transparent);
+    pointer-events: none;
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
   }
 }
 
@@ -78,6 +158,7 @@
   html, body {
     background: white !important;
     color: #0b1120 !important;
+    font-size: 11pt;
   }
   body {
     background-image: none !important;
@@ -90,7 +171,6 @@
     page-break-inside: avoid;
     break-inside: avoid;
   }
-  /* 색은 유지하되 가독성을 위해 텍스트는 어둡게 */
   .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400 {
     color: #1e293b !important;
   }
@@ -100,11 +180,21 @@
   .bg-slate-900\/40, .bg-slate-900\/60, .bg-slate-800\/40, .bg-slate-800\/60 {
     background: #f8fafc !important;
   }
-  /* 점수/판정 컬러 차이는 인쇄에도 보존 */
   .text-emerald-300, .text-emerald-400 { color: #15803d !important; }
   .text-amber-300,   .text-amber-400   { color: #b45309 !important; }
   .text-rose-300,    .text-rose-400    { color: #b91c1c !important; }
   .text-sky-300,     .text-violet-300  { color: #1e40af !important; }
   .text-amber-300 { color: #b45309 !important; }
+  /* 인쇄 시엔 전환/애니메이션 비활성화 */
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* 사용자가 동작 줄이기를 선호하면 모션 비활성 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

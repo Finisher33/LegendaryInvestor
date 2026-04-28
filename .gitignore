@@ -10,3 +10,5 @@ dist-ssr
 *.log
 .idea
 .vscode
+
+.vercel

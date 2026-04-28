@@ -84,27 +84,27 @@ export function MacroEditor({ macro, onChange, onReset, defaultExpanded = false,
                 <button
                   key={r.id}
                   onClick={() => setRegime(r.growth, r.inflation)}
-                  className={`text-left rounded-lg border px-3 py-2.5 transition ${
+                  className={`text-left rounded-lg border px-2.5 sm:px-3 py-2 sm:py-2.5 ${
                     active
                       ? 'border-sky-400/60 bg-sky-500/15'
                       : 'border-slate-700 bg-slate-900/40 hover:border-slate-600 hover:bg-slate-800/40'
                   }`}
                 >
-                  <div className="flex items-center gap-1 text-sm font-medium">
+                  <div className="flex items-center gap-1 text-[13px] sm:text-sm font-medium flex-wrap">
                     {r.growth === 'RISING' ? (
-                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     ) : (
-                      <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
+                      <TrendingDown className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                     )}
                     <span className="text-slate-200">성장</span>
                     {r.inflation === 'RISING' ? (
-                      <TrendingUp className="w-3.5 h-3.5 text-amber-400 ml-2" />
+                      <TrendingUp className="w-3.5 h-3.5 text-amber-400 ml-1 sm:ml-2 shrink-0" />
                     ) : (
-                      <TrendingDown className="w-3.5 h-3.5 text-sky-400 ml-2" />
+                      <TrendingDown className="w-3.5 h-3.5 text-sky-400 ml-1 sm:ml-2 shrink-0" />
                     )}
                     <span className="text-slate-200">인플레</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-1">{r.hint}</div>
+                  <div className="text-[10px] sm:text-[11px] text-slate-500 mt-1 leading-snug">{r.hint}</div>
                 </button>
               );
             })}

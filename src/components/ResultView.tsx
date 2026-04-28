@@ -36,7 +36,6 @@ export function ResultView({
   const [copied, setCopied] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // 패널 변경 시 상세로 부드럽게 스크롤 (직접 클릭만, 초기 로드는 제외)
   const isFirstSelect = useRef(true);
   useEffect(() => {
     if (isFirstSelect.current) {
@@ -67,64 +66,59 @@ export function ResultView({
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-6 pb-16">
+    <div className="mx-auto max-w-6xl px-4 pt-4 sm:pt-6 pb-12 sm:pb-16 fade-in">
       {/* Top bar */}
-      <div className="flex items-center gap-3 mb-6 no-print">
+      <div className="flex items-center gap-2 mb-5 sm:mb-6 no-print">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-md text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+          aria-label="뒤로"
         >
-          <ArrowLeft className="w-4 h-4" /> 뒤로
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">뒤로</span>
         </button>
-        <div className="ml-auto flex items-center gap-2">
-          <button
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <ActionBtn
             onClick={onToggleWatch}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border transition ${
-              isWatched
-                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                : 'border-slate-700 text-slate-400 hover:bg-slate-800/50'
-            }`}
-          >
-            <Star className={`w-4 h-4 ${isWatched ? 'fill-amber-400' : ''}`} />
-            {isWatched ? '워치리스트 추가됨' : '워치리스트 추가'}
-          </button>
-          <button
+            active={isWatched}
+            activeClass="bg-amber-500/15 border-amber-500/40 text-amber-300"
+            ariaLabel={isWatched ? '워치리스트 해제' : '워치리스트 추가'}
+            label={isWatched ? '추가됨' : '워치리스트'}
+            icon={<Star className={`w-4 h-4 ${isWatched ? 'fill-amber-400' : ''}`} />}
+          />
+          <ActionBtn
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border border-slate-700 text-slate-400 hover:bg-slate-800/50"
-            title="브라우저 인쇄 다이얼로그에서 'PDF로 저장'을 선택하세요"
-          >
-            <Printer className="w-4 h-4" /> PDF
-          </button>
-          <button
+            ariaLabel="PDF로 저장"
+            label="PDF"
+            icon={<Printer className="w-4 h-4" />}
+          />
+          <ActionBtn
             onClick={handleShare}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border transition ${
-              copied
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                : 'border-slate-700 text-slate-400 hover:bg-slate-800/50'
-            }`}
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-            {copied ? '복사됨' : '공유'}
-          </button>
+            active={copied}
+            activeClass="border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+            ariaLabel="공유"
+            label={copied ? '복사됨' : '공유'}
+            icon={copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+          />
         </div>
       </div>
 
       {/* Stock header */}
-      <div className="card p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-          <div>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="font-mono text-2xl font-bold text-amber-300">{diagnosis.ticker}</span>
-              <span className="text-lg font-medium">{diagnosis.name}</span>
-              <span className="text-sm text-slate-500">{diagnosis.nameKo}</span>
+      <div className="card p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+              <span className="font-mono text-xl sm:text-2xl font-bold text-amber-300">{diagnosis.ticker}</span>
+              <span className="text-base sm:text-lg font-medium truncate max-w-full">{diagnosis.name}</span>
+              <span className="text-xs sm:text-sm text-slate-500">{diagnosis.nameKo}</span>
             </div>
-            <div className="text-3xl font-bold mt-2">{fmtUsd(diagnosis.price)}</div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-2xl sm:text-3xl font-bold mt-1.5 sm:mt-2 tabular-nums">{fmtUsd(diagnosis.price)}</div>
+            <div className="text-[11px] sm:text-xs text-slate-500 mt-1">
               진단 시각: {new Date(diagnosis.asOf).toLocaleString('ko-KR')}
             </div>
           </div>
 
-          <div className="ml-auto card bg-slate-900/40 px-5 py-3 grid grid-cols-3 gap-4 min-w-fit">
+          <div className="sm:ml-auto card bg-slate-900/40 px-3 py-3 sm:px-5 grid grid-cols-3 gap-2 sm:gap-4">
             <Stat label="종합 점수" value={`${overallScore}`} suffix="/100" tone={dominant} />
             <Stat
               label="컨센서스"
@@ -132,22 +126,18 @@ export function ResultView({
               tone={dominant}
               suffix="긍·중·부"
             />
-            <Stat
-              label="결과"
-              value={verdictKo(dominant)}
-              tone={dominant}
-            />
+            <Stat label="결과" value={verdictKo(dominant)} tone={dominant} />
           </div>
         </div>
       </div>
 
       {/* Macro editor */}
-      <div className="mb-8 no-print">
+      <div className="mb-6 sm:mb-8 no-print">
         <MacroEditor macro={macro} onChange={onMacroChange} onReset={onResetMacro} />
       </div>
 
       {/* Panel cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10">
         {PERSONA_ORDER.map((id) => {
           const panel = diagnosis.panels.find((p) => p.persona === id)!;
           return (
@@ -162,10 +152,39 @@ export function ResultView({
       </div>
 
       {/* Detail */}
-      <div ref={detailRef} className="scroll-mt-24">
+      <div ref={detailRef} className="scroll-mt-20 sm:scroll-mt-24">
         <PanelDetail panel={selectedPanel} ticker={diagnosis.ticker} nameKo={diagnosis.nameKo} />
       </div>
     </div>
+  );
+}
+
+function ActionBtn({
+  onClick,
+  active = false,
+  activeClass,
+  ariaLabel,
+  label,
+  icon,
+}: {
+  onClick: () => void;
+  active?: boolean;
+  activeClass?: string;
+  ariaLabel: string;
+  label: string;
+  icon: React.ReactNode;
+}) {
+  const base = 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-sm border';
+  const inactive = 'border-slate-700 text-slate-400 hover:bg-slate-800/50';
+  return (
+    <button
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={`${base} ${active ? activeClass : inactive}`}
+    >
+      {icon}
+      <span className="hidden sm:inline">{label}</span>
+    </button>
   );
 }
 
@@ -181,10 +200,10 @@ function Stat({
   tone: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
 }) {
   return (
-    <div className="text-center">
-      <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
-      <div className={`text-xl font-bold tabular-nums ${verdictColor(tone)}`}>{value}</div>
-      {suffix && <div className="text-[10px] text-slate-500 -mt-0.5">{suffix}</div>}
+    <div className="text-center min-w-0">
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 truncate">{label}</div>
+      <div className={`text-base sm:text-xl font-bold tabular-nums ${verdictColor(tone)}`}>{value}</div>
+      {suffix && <div className="text-[9px] sm:text-[10px] text-slate-500 -mt-0.5 truncate">{suffix}</div>}
     </div>
   );
 }

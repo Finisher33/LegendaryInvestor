@@ -13,38 +13,38 @@ export function PanelDetail({ panel, ticker, nameKo }: Props) {
   const p = PERSONAS[panel.persona];
 
   return (
-    <div className="card p-6">
+    <div className="card p-4 sm:p-6 fade-in" key={panel.persona}>
       {/* Header */}
-      <div className="flex items-start gap-4 mb-6">
-        <div className={`w-14 h-14 rounded-full grid place-items-center text-2xl border ${p.badgeBg} ${p.themeColor}`}>
+      <div className="flex items-start gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full grid place-items-center text-xl sm:text-2xl border shrink-0 ${p.badgeBg} ${p.themeColor}`}>
           {p.symbol}
         </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold">{p.nameKo}</h2>
-            <span className="text-xs text-slate-500">{p.nameEn}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold">{p.nameKo}</h2>
+            <span className="text-[11px] sm:text-xs text-slate-500">{p.nameEn}</span>
           </div>
-          <div className="text-xs text-slate-500">{p.era}</div>
-          <div className="text-xs text-slate-400 mt-1">{p.philosophyKo}</div>
+          <div className="text-[11px] sm:text-xs text-slate-500 truncate">{p.era}</div>
+          <div className="text-[11px] sm:text-xs text-slate-400 mt-0.5">{p.philosophyKo}</div>
         </div>
-        <div className="text-right">
-          <div className={`text-xs font-bold inline-block px-2 py-1 rounded-md border mb-1 ${verdictBg(panel.verdict)} ${verdictColor(panel.verdict)}`}>
+        <div className="text-right shrink-0">
+          <div className={`text-[10px] sm:text-xs font-bold inline-block px-2 py-0.5 sm:py-1 rounded-md border mb-1 ${verdictBg(panel.verdict)} ${verdictColor(panel.verdict)}`}>
             {verdictKo(panel.verdict)}
           </div>
-          <div className={`text-3xl font-bold tabular-nums ${verdictColor(panel.verdict)}`}>{panel.score}</div>
+          <div className={`text-2xl sm:text-3xl font-bold tabular-nums ${verdictColor(panel.verdict)}`}>{panel.score}</div>
           <div className="text-[10px] text-slate-500 -mt-1">/ 100</div>
         </div>
       </div>
 
       {/* Headline */}
-      <div className="border-l-2 border-amber-500/50 pl-4 mb-6">
-        <div className="text-base font-medium text-slate-100">{panel.headline}</div>
-        <div className="text-sm text-slate-400 leading-relaxed mt-2">{panel.body}</div>
+      <div className="border-l-2 border-amber-500/50 pl-3 sm:pl-4 mb-5 sm:mb-6">
+        <div className="text-base font-medium text-slate-100 leading-relaxed">{panel.headline}</div>
+        <div className="text-[13px] sm:text-sm text-slate-400 leading-relaxed mt-2">{panel.body}</div>
       </div>
 
-      {/* Meta badges (Lynch category, Druckenmiller bet, Graham track) */}
+      {/* Meta badges */}
       {panel.meta && Object.keys(panel.meta).length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-5 sm:mb-6">
           {panel.persona === 'LYNCH' && panel.meta.lynchCategoryKo && (
             <span className="chip text-emerald-300 border-emerald-500/30 bg-emerald-500/10">
               카테고리: {String(panel.meta.lynchCategoryKo)}
@@ -79,55 +79,57 @@ export function PanelDetail({ panel, ticker, nameKo }: Props) {
       )}
 
       {/* Axes */}
-      <div className="space-y-4 mb-6">
-        <h3 className="text-xs uppercase tracking-wider text-slate-500">평가 축</h3>
+      <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
+        <h3 className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500">평가 축</h3>
         {panel.axes.map((a, i) => (
           <div key={i}>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="flex-1 text-slate-200">{a.name}</span>
-              {a.display && <span className="font-mono text-xs text-slate-400">{a.display}</span>}
-              <span className={`font-bold tabular-nums ${a.passed ? 'text-emerald-400' : 'text-slate-400'}`}>
+            <div className="flex items-center gap-2 text-[13px] sm:text-sm flex-wrap">
+              <span className="flex-1 min-w-[8rem] text-slate-200">{a.name}</span>
+              {a.display && <span className="font-mono text-[11px] text-slate-400 truncate max-w-full">{a.display}</span>}
+              <span className={`font-bold tabular-nums ${a.passed ? 'text-emerald-400' : 'text-slate-400'} shrink-0 w-9 text-right`}>
                 {a.value}
               </span>
             </div>
             <div className="mt-1.5 h-2 bg-slate-800 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full ${a.passed ? 'bg-emerald-400/80' : 'bg-slate-500'}`}
+                key={a.value}
+                className={`score-bar h-full rounded-full ${a.passed ? 'bg-emerald-400/80' : 'bg-slate-500'}`}
                 style={{ width: `${a.value}%` }}
               />
             </div>
             {a.rationaleKo && (
-              <div className="text-xs text-slate-500 mt-1 leading-relaxed">{a.rationaleKo}</div>
+              <div className="text-[11px] sm:text-xs text-slate-500 mt-1 leading-relaxed">{a.rationaleKo}</div>
             )}
           </div>
         ))}
       </div>
 
       {/* Data Refs */}
-      <div className="mb-6">
-        <h3 className="text-xs uppercase tracking-wider text-slate-500 mb-3">핵심 지표 (계산값)</h3>
+      <div className="mb-5 sm:mb-6">
+        <h3 className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500 mb-2 sm:mb-3">핵심 지표 (계산값)</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {panel.dataRefs.map((d, i) => (
-            <div key={i} className="rounded-md border border-slate-800 bg-slate-900/40 px-3 py-2">
+            <div key={i} className="rounded-md border border-slate-800 bg-slate-900/40 px-2.5 sm:px-3 py-2 min-w-0">
               <div className="text-[10px] text-slate-500 truncate">{d.metric}</div>
-              <div className="text-sm font-mono text-slate-200">{d.display}</div>
+              <div className="text-[13px] sm:text-sm font-mono text-slate-200 truncate">{d.display}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Quote */}
-      <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-5">
-        <div className="flex items-start gap-3">
+      <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 sm:p-5">
+        <div className="flex items-start gap-2.5 sm:gap-3">
           <QuoteIcon className={`w-5 h-5 shrink-0 ${p.themeColor}`} />
-          <div className="flex-1">
-            <p className={`text-base font-medium leading-relaxed ${p.themeColor}`}>
+          <div className="flex-1 min-w-0">
+            <p className={`text-[15px] sm:text-base font-medium leading-relaxed ${p.themeColor}`}>
               “{panel.quote.text}”
             </p>
-            <div className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-              <BookOpen className="w-3 h-3" />
-              {panel.quote.pageOrYear} <span className="text-slate-600">·</span>
-              <span className="font-mono text-slate-600">{panel.quote.sourceId}</span>
+            <div className="text-[11px] sm:text-xs text-slate-500 mt-2 flex items-center gap-1 flex-wrap">
+              <BookOpen className="w-3 h-3 shrink-0" />
+              <span>{panel.quote.pageOrYear}</span>
+              <span className="text-slate-600 hidden sm:inline">·</span>
+              <span className="font-mono text-slate-600 truncate">{panel.quote.sourceId}</span>
             </div>
           </div>
         </div>

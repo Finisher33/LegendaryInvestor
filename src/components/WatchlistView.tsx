@@ -26,22 +26,24 @@ export function WatchlistView({ tickers, onBack, onOpen, onRemove, onGoHome, mac
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-6 pb-16">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="mx-auto max-w-6xl px-4 pt-4 sm:pt-6 pb-12 sm:pb-16 fade-in">
+      <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-md text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+          aria-label="뒤로"
         >
-          <ArrowLeft className="w-4 h-4" /> 뒤로
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">뒤로</span>
         </button>
-        <h1 className="text-xl font-bold flex items-center gap-2">
+        <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
           <Star className="w-5 h-5 text-amber-300 fill-amber-400" /> 워치리스트
         </h1>
-        <span className="text-xs text-slate-500">{items.length}종목</span>
+        <span className="text-[11px] sm:text-xs text-slate-500">{items.length}종목</span>
       </div>
 
       {items.length === 0 ? (
-        <div className="card p-12 text-center">
+        <div className="card p-8 sm:p-12 text-center">
           <Star className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <p className="text-slate-400 mb-1">아직 워치리스트가 비어있습니다.</p>
           <p className="text-xs text-slate-500 mb-5">
@@ -64,22 +66,27 @@ export function WatchlistView({ tickers, onBack, onOpen, onRemove, onGoHome, mac
             return (
               <div
                 key={t.ticker}
-                className={`flex items-center gap-4 px-4 py-3 ${
+                className={`flex items-center gap-2 sm:gap-4 px-3 sm:px-4 py-3 ${
                   idx > 0 ? 'border-t border-slate-800' : ''
                 } hover:bg-slate-800/30`}
               >
-                <button onClick={() => onOpen(t)} className="flex items-center gap-3 flex-1 text-left">
-                  <span className="font-mono font-bold text-amber-300 w-16">{t.ticker}</span>
-                  <span className="flex-1">
-                    <span className="text-slate-100">{t.name}</span>
-                    <span className="text-slate-500 text-xs ml-2">{t.nameKo}</span>
+                <button
+                  onClick={() => onOpen(t)}
+                  className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 text-left"
+                >
+                  <span className="font-mono font-bold text-amber-300 text-sm sm:text-base w-14 sm:w-16 shrink-0">
+                    {t.ticker}
+                  </span>
+                  <span className="flex-1 min-w-0 truncate">
+                    <span className="text-slate-100 text-sm">{t.name}</span>
+                    <span className="text-slate-500 text-[11px] ml-1.5 hidden sm:inline">{t.nameKo}</span>
                   </span>
                 </button>
                 <div className="text-right text-sm tabular-nums hidden md:block">
                   <div>{fmtUsd(t.price)}</div>
                 </div>
 
-                {/* Mini panel scores */}
+                {/* Mini panel scores — desktop only */}
                 <div className="hidden lg:flex gap-1.5">
                   {PERSONA_ORDER.map((pid) => {
                     const panel = d.panels.find((x) => x.persona === pid)!;
@@ -102,14 +109,23 @@ export function WatchlistView({ tickers, onBack, onOpen, onRemove, onGoHome, mac
                   })}
                 </div>
 
-                <div className="text-right">
-                  <div className={`text-lg font-bold tabular-nums ${verdictColor(dom)}`}>{overall}</div>
+                {/* Mini consensus dots — mobile + tablet */}
+                <div className="flex lg:hidden items-center gap-0.5 text-[10px] font-mono shrink-0">
+                  <span className="text-emerald-400">{d.consensus.positive}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-amber-400">{d.consensus.neutral}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-rose-400">{d.consensus.negative}</span>
+                </div>
+
+                <div className="text-right shrink-0 w-10 sm:w-auto">
+                  <div className={`text-base sm:text-lg font-bold tabular-nums ${verdictColor(dom)}`}>{overall}</div>
                   <div className={`text-[10px] ${verdictColor(dom)}`}>{verdictKo(dom)}</div>
                 </div>
 
                 <button
                   onClick={() => onRemove(t.ticker)}
-                  className="text-slate-500 hover:text-rose-400 p-2"
+                  className="text-slate-500 hover:text-rose-400 p-1.5 sm:p-2 shrink-0"
                   aria-label="제거"
                 >
                   <Trash2 className="w-4 h-4" />

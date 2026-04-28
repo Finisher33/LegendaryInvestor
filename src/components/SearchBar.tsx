@@ -33,11 +33,11 @@ export function SearchBar({ onSelect, autoFocus, size = 'lg' }: Props) {
     }
   };
 
-  const sizeCls = size === 'lg' ? 'h-14 text-lg' : 'h-11 text-base';
+  const sizeCls = size === 'lg' ? 'h-12 sm:h-14 text-base sm:text-lg' : 'h-11 text-base';
 
   return (
     <div ref={wrap} className="relative w-full">
-      <div className={`flex items-center gap-3 px-4 ${sizeCls} rounded-xl border border-slate-700 bg-slate-900/60 focus-within:border-amber-500/60 focus-within:ring-2 focus-within:ring-amber-500/20 transition`}>
+      <div className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 ${sizeCls} rounded-xl border border-slate-700 bg-slate-900/60 focus-within:border-amber-500/60 focus-within:ring-2 focus-within:ring-amber-500/20 transition`}>
         <Search className="w-5 h-5 text-slate-400 shrink-0" />
         <input
           autoFocus={autoFocus}
@@ -62,7 +62,7 @@ export function SearchBar({ onSelect, autoFocus, size = 'lg' }: Props) {
               setOpen(false);
             }
           }}
-          placeholder="티커 또는 회사명을 입력 (예: AAPL, 애플, NVIDIA)"
+          placeholder="티커 또는 회사명 (예: AAPL, 애플)"
           className="flex-1 bg-transparent outline-none text-slate-100 placeholder:text-slate-500"
         />
         <kbd className="hidden sm:inline-flex text-[10px] text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Enter</kbd>
