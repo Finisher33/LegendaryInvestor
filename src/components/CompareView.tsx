@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Plus, X, Check } from 'lucide-react';
-import { TICKERS, searchTickers } from '../data/tickers';
+import { getTickerData, searchTickers } from '../data/tickers';
 import { diagnose } from '../legends';
 import { PERSONA_ORDER, PERSONAS } from '../legends/personas';
 import type { Diagnosis, MacroState, TickerData } from '../types';
@@ -33,8 +33,12 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
     onTickersChange?.(next);
   };
 
-  const diagnoses = useMemo<Diagnosis[]>(
-    () => tickers.map((tk) => diagnose(TICKERS[tk], macro)),
+  const diagnoses = useMemo<(Diagnosis | null)[]>(
+    () =>
+      tickers.map((tk) => {
+        const t = getTickerData(tk);
+        return t ? diagnose(t, macro) : null;
+      }),
     [tickers, macro],
   );
   const results = search ? searchTickers(search, 6) : [];
@@ -49,7 +53,8 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
 
   const removeTicker = (tk: string) => setTickersAndNotify(tickers.filter((t) => t !== tk));
 
-  const matchesFilter = (d: Diagnosis): boolean => {
+  const matchesFilter = (d: Diagnosis | null): boolean => {
+    if (!d) return true;
     const { positive, negative } = d.consensus;
     switch (filter) {
       case 'ALL_POS': return positive >= 5;
@@ -100,8 +105,9 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
       {/* ── Mobile: ticker stack ─────────────────────────────────────── */}
       <div className="sm:hidden space-y-3">
         {tickers.map((tk, ti) => {
-          const t = TICKERS[tk];
+          const t = getTickerData(tk);
           const d = diagnoses[ti];
+          if (!t || !d) return null;
           const dim = !matchesFilter(d);
           return (
             <div
@@ -196,8 +202,9 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
         <div className="grid mb-2" style={{ gridTemplateColumns: `180px repeat(${tickers.length}, minmax(0, 1fr)) auto` }}>
           <div />
           {tickers.map((tk, ti) => {
-            const t = TICKERS[tk];
+            const t = getTickerData(tk);
             const d = diagnoses[ti];
+            if (!t || !d) return null;
             const dim = !matchesFilter(d);
             return (
               <div key={tk} className={`px-2 text-center transition-opacity ${dim ? 'opacity-30' : ''}`}>
@@ -279,6 +286,7 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
                   </div>
                 </div>
                 {diagnoses.map((d, i) => {
+                  if (!d) return <div key={i} />;
                   const panel = d.panels.find((x) => x.persona === pid)!;
                   const dim = !matchesFilter(d);
                   return (
@@ -312,6 +320,7 @@ export function CompareView({ initialTickers, onBack, onOpenTicker, macro, onTic
           >
             <div className="px-4 py-3 text-sm font-semibold">컨센서스 (긍·중·부)</div>
             {diagnoses.map((d, i) => {
+              if (!d) return <div key={i} />;
               const dim = !matchesFilter(d);
               return (
                 <div key={i} className={`px-2 py-3 text-center text-sm font-mono transition-opacity ${dim ? 'opacity-30' : ''}`}>

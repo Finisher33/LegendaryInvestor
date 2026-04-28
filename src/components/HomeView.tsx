@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SearchBar } from './SearchBar';
-import { TICKERS } from '../data/tickers';
+import { getTickerData } from '../data/tickers';
 import { PERSONA_ORDER, PERSONAS } from '../legends/personas';
 import type { MacroState, TickerData } from '../types';
 import { Sparkles } from 'lucide-react';
@@ -26,7 +26,7 @@ export function HomeView({ onSelect, macro, onMacroChange, onResetMacro }: Props
   }, []);
 
   const recentTickers = recent
-    .map((tk) => TICKERS[tk])
+    .map((tk) => getTickerData(tk))
     .filter((t): t is TickerData => Boolean(t))
     .slice(0, 6);
 
@@ -74,7 +74,8 @@ export function HomeView({ onSelect, macro, onMacroChange, onResetMacro }: Props
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-slate-500 mr-1">추천:</span>
           {(['AAPL', 'NVDA', 'BRK.B', 'KO', 'TSLA', 'JPM'] as const).map((tk) => {
-            const t = TICKERS[tk];
+            const t = getTickerData(tk);
+            if (!t) return null;
             return (
               <button
                 key={tk}

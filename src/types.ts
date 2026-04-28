@@ -25,7 +25,8 @@ export type Sector =
   | 'ENERGY'
   | 'COMMUNICATION'
   | 'UTILITIES'
-  | 'MATERIALS';
+  | 'MATERIALS'
+  | 'REAL_ESTATE';
 
 export interface TickerData {
   ticker: string;
@@ -80,6 +81,7 @@ export interface TickerData {
   insiderHolds: number;          // %
   // 공시
   isMissingPct?: number;         // 0~1
+  isSynthesized?: boolean;       // true = 시드 데이터(근사값), false/undefined = 큐레이션된 실수치
 }
 
 export interface MacroState {
@@ -132,10 +134,12 @@ export interface Diagnosis {
   ticker: string;
   name: string;
   nameKo: string;
+  sector: Sector;
   price: number;
   asOf: string;
   dataQuality: { missingPct: number; warnings: string[] };
   panels: PersonaVerdict[];
   consensus: { positive: number; neutral: number; negative: number };
   macro: MacroState;
+  isSynthesized: boolean;
 }

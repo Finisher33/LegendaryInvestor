@@ -111,10 +111,21 @@ export function ResultView({
               <span className="font-mono text-xl sm:text-2xl font-bold text-amber-300">{diagnosis.ticker}</span>
               <span className="text-base sm:text-lg font-medium truncate max-w-full">{diagnosis.name}</span>
               <span className="text-xs sm:text-sm text-slate-500">{diagnosis.nameKo}</span>
+              {diagnosis.isSynthesized && (
+                <span
+                  className="text-[10px] uppercase tracking-wider text-amber-200/80 border border-amber-500/30 bg-amber-500/10 rounded px-1.5 py-0.5"
+                  title="현재 베타에선 시드(근사) 데이터로 진단됩니다. 라이브 데이터 백엔드 v0.3 예정."
+                >
+                  SIM
+                </span>
+              )}
             </div>
             <div className="text-2xl sm:text-3xl font-bold mt-1.5 sm:mt-2 tabular-nums">{fmtUsd(diagnosis.price)}</div>
-            <div className="text-[11px] sm:text-xs text-slate-500 mt-1">
-              진단 시각: {new Date(diagnosis.asOf).toLocaleString('ko-KR')}
+            <div className="text-[11px] sm:text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
+              <span>진단 시각: {new Date(diagnosis.asOf).toLocaleString('ko-KR')}</span>
+              {diagnosis.isSynthesized && (
+                <span className="text-amber-300/70">· 데모용 시드 데이터</span>
+              )}
             </div>
           </div>
 

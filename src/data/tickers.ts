@@ -276,26 +276,105 @@ export const TICKERS: Record<string, TickerData> = {
   },
 };
 
-export const ALL_TICKERS = Object.keys(TICKERS);
+/* ── 시드 + 레지스트리 통합 조회 ────────────────────────────────────
+ * - SEED_TICKERS: 위에서 정의된 15종목 (실수치 근사) — 큐레이션 우선
+ * - REGISTRY: S&P 500 + Nasdaq 100 ~530종목 (식별 정보만)
+ * - getTickerData(symbol): SEED 우선, 없으면 synthesizeTicker로 합성하여 반환
+ * - searchTickers(q): SEED + REGISTRY 통합 검색 (티커/영문명/한글명 부분일치)
+ */
+import { REGISTRY, REGISTRY_MAP, type RegistryEntry } from './registry';
+import { synthesizeTicker } from './synth';
+
+const SEED_TICKERS = TICKERS;
+
+/** 큐레이션된 시드(15) + 레지스트리(530+)를 합쳐 ticker → TickerData를 돌려준다.
+ *  레지스트리에만 있는 종목은 합성으로 즉석 생성. 시드 우선. */
+export const getTickerData = (symbol: string): TickerData | null => {
+  const upper = symbol.trim().toUpperCase();
+  if (SEED_TICKERS[upper]) return SEED_TICKERS[upper];
+  const reg = REGISTRY_MAP[upper];
+  if (reg) return synthesizeTicker(reg);
+  return null;
+};
+
+/** ticker가 알려진 종목인지 (시드든 레지스트리든) */
+export const hasTicker = (symbol: string): boolean => getTickerData(symbol) !== null;
+
+export const allKnownTickers = (): string[] =>
+  Array.from(new Set([...Object.keys(SEED_TICKERS), ...REGISTRY.map((r) => r.ticker)]));
+
+export const ALL_TICKERS = allKnownTickers();
 
 export const findTicker = (q: string): TickerData | null => {
-  const upper = q.trim().toUpperCase();
-  if (TICKERS[upper]) return TICKERS[upper];
-  const byName = Object.values(TICKERS).find(
-    t => t.name.toLowerCase() === q.toLowerCase().trim() ||
-         t.nameKo === q.trim(),
+  const trimmed = q.trim();
+  const upper = trimmed.toUpperCase();
+  // 1) 정확한 ticker 매치
+  const exact = getTickerData(upper);
+  if (exact) return exact;
+  // 2) 시드 안에서 영문명/한글명 정확 매치
+  const seedByName = Object.values(SEED_TICKERS).find(
+    (t) => t.name.toLowerCase() === q.toLowerCase().trim() || t.nameKo === trimmed,
   );
-  return byName ?? null;
+  if (seedByName) return seedByName;
+  // 3) 레지스트리 안에서 영문명/한글명 정확 매치
+  const regByName = REGISTRY.find(
+    (r) => r.name.toLowerCase() === q.toLowerCase().trim() || r.nameKo === trimmed,
+  );
+  if (regByName) return synthesizeTicker(regByName);
+  return null;
 };
 
-export const searchTickers = (q: string, limit = 8): TickerData[] => {
+interface SearchResult {
+  ticker: string;
+  name: string;
+  nameKo: string;
+  sector: string;
+  isSeed: boolean;
+}
+
+/** UI용 가벼운 검색 결과 — TickerData 합성을 지연시켜 검색 응답 속도 보장.
+ *  실제 진단 시점에 getTickerData()로 변환된다. */
+export const searchTickers = (q: string, limit = 8): SearchResult[] => {
   const ql = q.toLowerCase().trim();
+  const qKo = q.trim();
   if (!ql) return [];
-  return Object.values(TICKERS)
-    .filter(t =>
-      t.ticker.toLowerCase().includes(ql) ||
-      t.name.toLowerCase().includes(ql) ||
-      t.nameKo.includes(q.trim()),
-    )
-    .slice(0, limit);
+
+  // 시드 우선 + 레지스트리 보조 — ticker prefix > 부분 일치 순
+  const matches: Array<{ score: number; r: SearchResult }> = [];
+
+  const score = (entry: { ticker: string; name: string; nameKo: string }, isSeed: boolean): number => {
+    const tk = entry.ticker.toLowerCase();
+    const nm = entry.name.toLowerCase();
+    let s = 0;
+    if (tk === ql) s = 1000;
+    else if (tk.startsWith(ql)) s = 800 - (tk.length - ql.length);
+    else if (tk.includes(ql)) s = 500 - tk.indexOf(ql);
+    else if (nm.startsWith(ql)) s = 600 - (nm.length - ql.length) * 0.1;
+    else if (nm.includes(ql)) s = 300 - nm.indexOf(ql) * 0.1;
+    else if (entry.nameKo && entry.nameKo.includes(qKo)) s = 400 - entry.nameKo.indexOf(qKo) * 0.1;
+    else return -1;
+    if (isSeed) s += 50; // 시드는 가벼운 가산점
+    return s;
+  };
+
+  for (const t of Object.values(SEED_TICKERS)) {
+    const s = score(t, true);
+    if (s > 0) matches.push({ score: s, r: { ticker: t.ticker, name: t.name, nameKo: t.nameKo, sector: t.sector, isSeed: true } });
+  }
+  for (const r of REGISTRY) {
+    if (SEED_TICKERS[r.ticker]) continue; // 시드와 중복 제거
+    const s = score(r, false);
+    if (s > 0) matches.push({ score: s, r: { ticker: r.ticker, name: r.name, nameKo: r.nameKo, sector: r.sector, isSeed: false } });
+  }
+
+  return matches
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((m) => m.r);
 };
+
+/** 카운트 — UI 표시용 */
+export const REGISTRY_SIZE = REGISTRY.length;
+export const SEED_SIZE = Object.keys(SEED_TICKERS).length;
+
+export type { RegistryEntry };

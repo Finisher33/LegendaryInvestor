@@ -31,6 +31,7 @@ export const SECTOR_REGIME_FIT: Record<
   COMMUNICATION:          { GR_IR:  0.1, GR_IF:  0.6, GF_IR: -0.3, GF_IF:  0.3 },
   UTILITIES:              { GR_IR: -0.2, GR_IF: -0.3, GF_IR:  0.5, GF_IF:  0.8 },
   MATERIALS:              { GR_IR:  0.8, GR_IF:  0.3, GF_IR: -0.4, GF_IF: -0.5 },
+  REAL_ESTATE:            { GR_IR:  0.3, GR_IF:  0.7, GF_IR: -0.5, GF_IF:  0.4 },
 };
 
 export const macroRegimeKey = (m: MacroState): 'GR_IR' | 'GR_IF' | 'GF_IR' | 'GF_IF' =>

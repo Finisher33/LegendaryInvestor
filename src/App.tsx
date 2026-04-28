@@ -7,7 +7,7 @@ import { ResultView } from './components/ResultView';
 import { CompareView } from './components/CompareView';
 import { WatchlistView } from './components/WatchlistView';
 import { diagnose } from './legends';
-import { TICKERS } from './data/tickers';
+import { getTickerData } from './data/tickers';
 import { CURRENT_MACRO } from './data/macro';
 import type { Diagnosis, MacroState, PersonaId, TickerData } from './types';
 import { parseHash, setHash, type ParsedRoute } from './utils/hashRoute';
@@ -60,14 +60,14 @@ export default function App() {
         if (parsed.kind === 'home') return { kind: 'home' };
         if (parsed.kind === 'watchlist') return { kind: 'watchlist' };
         if (parsed.kind === 'compare') {
-          const tickers = parsed.tickers.filter((tk) => TICKERS[tk]);
+          const tickers = parsed.tickers.filter((tk) => getTickerData(tk) !== null);
           return {
             kind: 'compare',
             tickers: tickers.length > 0 ? tickers : ['AAPL', 'NVDA'],
           };
         }
         // ticker route — but only run diagnose if not already on this ticker
-        const t = TICKERS[parsed.ticker];
+        const t = getTickerData(parsed.ticker);
         if (!t) return { kind: 'home' };
         if (cur.kind === 'result' && cur.diagnosis.ticker === parsed.ticker) {
           return { ...cur, persona: parsed.persona };
@@ -100,7 +100,7 @@ export default function App() {
   // ── Re-diagnose on macro change if currently viewing a result ─────────
   useEffect(() => {
     if (route.kind === 'result') {
-      const t = TICKERS[route.diagnosis.ticker];
+      const t = getTickerData(route.diagnosis.ticker);
       if (t) {
         const d = diagnose(t, macro);
         setRoute({ kind: 'result', diagnosis: d, persona: route.persona });

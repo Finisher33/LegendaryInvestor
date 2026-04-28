@@ -29,12 +29,14 @@ export function diagnose(ticker: TickerData, macro: MacroState = CURRENT_MACRO):
     ticker: ticker.ticker,
     name: ticker.name,
     nameKo: ticker.nameKo,
+    sector: ticker.sector,
     price: ticker.price,
     asOf: new Date().toISOString(),
     dataQuality: { missingPct: ticker.isMissingPct ?? 0, warnings: [] },
     panels,
     consensus,
     macro,
+    isSynthesized: ticker.isSynthesized === true,
   };
 }
 

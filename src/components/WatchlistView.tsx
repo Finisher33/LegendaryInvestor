@@ -1,6 +1,6 @@
 import { ArrowLeft, Star, Trash2, Search } from 'lucide-react';
 import { useMemo } from 'react';
-import { TICKERS } from '../data/tickers';
+import { getTickerData } from '../data/tickers';
 import { diagnose } from '../legends';
 import { PERSONA_ORDER, PERSONAS } from '../legends/personas';
 import type { MacroState, TickerData } from '../types';
@@ -19,7 +19,7 @@ export function WatchlistView({ tickers, onBack, onOpen, onRemove, onGoHome, mac
   const items = useMemo(
     () =>
       tickers
-        .map((tk) => TICKERS[tk])
+        .map((tk) => getTickerData(tk))
         .filter((t): t is TickerData => Boolean(t))
         .map((t) => ({ t, d: diagnose(t, macro) })),
     [tickers, macro],
