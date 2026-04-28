@@ -82,7 +82,37 @@ export interface TickerData {
   // 공시
   isMissingPct?: number;         // 0~1
   isSynthesized?: boolean;       // true = 시드 데이터(근사값), false/undefined = 큐레이션된 실수치
+  liveFields?: LiveField[];      // 라이브로 덮어써진 필드 목록
+  liveQuote?: LiveQuote;         // 원본 라이브 응답 (UI 표시용)
 }
+
+export interface LiveQuote {
+  ticker: string;
+  ok: boolean;
+  source: 'yahoo-v7' | 'yahoo-v8' | 'none';
+  asOf: string;                       // 응답 도착 시각
+  regularMarketTimeIso: string | null;// 거래소 마지막 체결 시각
+  price: number | null;
+  prevClose: number | null;
+  dayChangePct: number | null;
+  marketCapUsd: number | null;
+  marketCapB: number | null;          // 십억 USD
+  peTtm: number | null;
+  forwardPE: number | null;
+  pbRatio: number | null;
+  divYield: number | null;
+  fiftyTwoWeekLow: number | null;
+  fiftyTwoWeekHigh: number | null;
+  beta: number | null;
+  currency: string | null;
+  shortName: string | null;
+  exchange: string | null;
+  marketState: string | null;         // 'REGULAR' | 'CLOSED' | 'PRE' | 'POST'
+  warnings: string[];
+}
+
+/** 진단에 라이브 데이터를 적용했을 때 어떤 필드가 실시간으로 갱신됐는지 추적 */
+export type LiveField = 'price' | 'marketCap' | 'peTtm' | 'pbRatio' | 'divYield' | 'beta' | 'fiftyTwoWeekRange';
 
 export interface MacroState {
   growthDirection: 'RISING' | 'FALLING';
@@ -142,4 +172,6 @@ export interface Diagnosis {
   consensus: { positive: number; neutral: number; negative: number };
   macro: MacroState;
   isSynthesized: boolean;
+  liveFields: LiveField[];        // 라이브로 갱신된 필드 (빈 배열 = 모두 시드/합성)
+  liveQuote?: LiveQuote;
 }

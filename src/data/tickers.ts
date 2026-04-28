@@ -282,6 +282,7 @@ export const TICKERS: Record<string, TickerData> = {
  * - getTickerData(symbol): SEED 우선, 없으면 synthesizeTicker로 합성하여 반환
  * - searchTickers(q): SEED + REGISTRY 통합 검색 (티커/영문명/한글명 부분일치)
  */
+import type { LiveField, LiveQuote } from '../types';
 import { REGISTRY, REGISTRY_MAP, type RegistryEntry } from './registry';
 import { synthesizeTicker } from './synth';
 
@@ -299,6 +300,60 @@ export const getTickerData = (symbol: string): TickerData | null => {
 
 /** ticker가 알려진 종목인지 (시드든 레지스트리든) */
 export const hasTicker = (symbol: string): boolean => getTickerData(symbol) !== null;
+
+/**
+ * 라이브 시세를 베이스 TickerData에 덮어써 새 객체로 반환.
+ * - 어떤 필드가 라이브로 갱신됐는지 liveFields 배열에 기록
+ * - PE 갱신 시 EPS도 자동 재계산 (Graham number 같은 의존 지표가 정확해지도록)
+ * - 시총 갱신 시 Owner Earnings Yield도 재계산
+ */
+export const applyLiveQuote = (base: TickerData, q: LiveQuote): TickerData => {
+  const out: TickerData = { ...base };
+  const live: LiveField[] = [];
+
+  if (q.price != null && q.price > 0) {
+    out.price = Math.round(q.price * 100) / 100;
+    live.push('price');
+  }
+  if (q.marketCapB != null && q.marketCapB > 0) {
+    out.marketCap = q.marketCapB;
+    live.push('marketCap');
+    // Owner earnings yield는 marketCap 변화에 비례 — TTM은 그대로 두고
+    // diagnose 측에서 ratio가 자동 재계산됨
+  }
+  if (q.peTtm != null && q.peTtm > 0) {
+    out.peTtm = Math.round(q.peTtm * 100) / 100;
+    live.push('peTtm');
+    // EPS 재계산 (Graham Number 정확도 향상)
+    if (out.price > 0) {
+      out.eps = Math.round((out.price / out.peTtm) * 100) / 100;
+    }
+  }
+  if (q.pbRatio != null && q.pbRatio > 0) {
+    out.bvps = out.price > 0 ? Math.round((out.price / q.pbRatio) * 100) / 100 : out.bvps;
+    live.push('pbRatio');
+  }
+  if (q.divYield != null && q.divYield >= 0) {
+    out.divYield = q.divYield;
+    live.push('divYield');
+  }
+  if (q.beta != null && q.beta > 0) {
+    out.beta = q.beta;
+    out.betaToMacro = q.beta;  // 우리 모델은 동일 컨셉
+    live.push('beta');
+  }
+  if (q.fiftyTwoWeekHigh != null && q.fiftyTwoWeekHigh > 0 && q.fiftyTwoWeekLow != null) {
+    // 최근 drawdown = (52주 고점 - 현재가) / 52주 고점
+    if (out.price > 0) {
+      out.recentDrawdown = Math.max(0, (q.fiftyTwoWeekHigh - out.price) / q.fiftyTwoWeekHigh);
+    }
+    live.push('fiftyTwoWeekRange');
+  }
+
+  out.liveFields = live;
+  out.liveQuote = q;
+  return out;
+};
 
 export const allKnownTickers = (): string[] =>
   Array.from(new Set([...Object.keys(SEED_TICKERS), ...REGISTRY.map((r) => r.ticker)]));

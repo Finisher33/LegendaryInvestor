@@ -7,7 +7,7 @@ import { ResultView } from './components/ResultView';
 import { CompareView } from './components/CompareView';
 import { WatchlistView } from './components/WatchlistView';
 import { diagnose } from './legends';
-import { getTickerData } from './data/tickers';
+import { applyLiveQuote, getTickerData } from './data/tickers';
 import { CURRENT_MACRO } from './data/macro';
 import type { Diagnosis, MacroState, PersonaId, TickerData } from './types';
 import { parseHash, setHash, type ParsedRoute } from './utils/hashRoute';
@@ -100,9 +100,13 @@ export default function App() {
   // ── Re-diagnose on macro change if currently viewing a result ─────────
   useEffect(() => {
     if (route.kind === 'result') {
-      const t = getTickerData(route.diagnosis.ticker);
-      if (t) {
-        const d = diagnose(t, macro);
+      const base = getTickerData(route.diagnosis.ticker);
+      if (base) {
+        // 기존 결과의 liveQuote을 보존해서 재진단 (재fetch 방지)
+        const merged = route.diagnosis.liveQuote
+          ? applyLiveQuote(base, route.diagnosis.liveQuote)
+          : base;
+        const d = diagnose(merged, macro);
         setRoute({ kind: 'result', diagnosis: d, persona: route.persona });
       }
     }
@@ -124,10 +128,12 @@ export default function App() {
 
   const handleSelect = (t: TickerData) => goLoading(t);
 
-  const handleLoadingDone = useCallback(() => {
+  const handleLoadingDone = useCallback(async (live: { quote?: import('./types').LiveQuote }) => {
+    // setState는 비동기 update 패턴 — current loading state를 안전하게 캡처
     setRoute((cur) => {
       if (cur.kind !== 'loading') return cur;
-      const d = diagnose(cur.ticker, macro);
+      const merged = live.quote ? applyLiveQuote(cur.ticker, live.quote) : cur.ticker;
+      const d = diagnose(merged, macro);
       return { kind: 'result', diagnosis: d, persona: cur.persona };
     });
   }, [macro]);

@@ -111,20 +111,57 @@ export function ResultView({
               <span className="font-mono text-xl sm:text-2xl font-bold text-amber-300">{diagnosis.ticker}</span>
               <span className="text-base sm:text-lg font-medium truncate max-w-full">{diagnosis.name}</span>
               <span className="text-xs sm:text-sm text-slate-500">{diagnosis.nameKo}</span>
-              {diagnosis.isSynthesized && (
+              {diagnosis.liveFields.length > 0 && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 rounded px-1.5 py-0.5"
+                  title={`Yahoo Finance 라이브: ${diagnosis.liveFields.join(', ')}`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  LIVE
+                </span>
+              )}
+              {diagnosis.isSynthesized && diagnosis.liveFields.length === 0 && (
                 <span
                   className="text-[10px] uppercase tracking-wider text-amber-200/80 border border-amber-500/30 bg-amber-500/10 rounded px-1.5 py-0.5"
-                  title="현재 베타에선 시드(근사) 데이터로 진단됩니다. 라이브 데이터 백엔드 v0.3 예정."
+                  title="라이브 데이터를 가져오지 못해 시드(근사) 데이터로 진단됩니다."
                 >
                   SIM
                 </span>
               )}
             </div>
-            <div className="text-2xl sm:text-3xl font-bold mt-1.5 sm:mt-2 tabular-nums">{fmtUsd(diagnosis.price)}</div>
+            <div className="flex items-baseline gap-2 sm:gap-3 mt-1.5 sm:mt-2 flex-wrap">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums">{fmtUsd(diagnosis.price)}</span>
+              {diagnosis.liveQuote?.dayChangePct != null && (
+                <span
+                  className={`text-sm font-medium tabular-nums ${
+                    diagnosis.liveQuote.dayChangePct >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  }`}
+                >
+                  {diagnosis.liveQuote.dayChangePct >= 0 ? '+' : ''}
+                  {(diagnosis.liveQuote.dayChangePct * 100).toFixed(2)}%
+                </span>
+              )}
+              {diagnosis.liveQuote?.marketState && diagnosis.liveQuote.marketState !== 'REGULAR' && (
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">
+                  {diagnosis.liveQuote.marketState}
+                </span>
+              )}
+            </div>
             <div className="text-[11px] sm:text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
-              <span>진단 시각: {new Date(diagnosis.asOf).toLocaleString('ko-KR')}</span>
-              {diagnosis.isSynthesized && (
+              {diagnosis.liveQuote?.regularMarketTimeIso ? (
+                <span>
+                  체결 시각: {new Date(diagnosis.liveQuote.regularMarketTimeIso).toLocaleString('ko-KR')}
+                  <span className="text-slate-600 mx-1">·</span>
+                  Yahoo Finance
+                </span>
+              ) : (
+                <span>진단 시각: {new Date(diagnosis.asOf).toLocaleString('ko-KR')}</span>
+              )}
+              {diagnosis.isSynthesized && diagnosis.liveFields.length === 0 && (
                 <span className="text-amber-300/70">· 데모용 시드 데이터</span>
+              )}
+              {diagnosis.isSynthesized && diagnosis.liveFields.length > 0 && (
+                <span className="text-slate-600">· 가격은 라이브, 재무비율은 시드</span>
               )}
             </div>
           </div>

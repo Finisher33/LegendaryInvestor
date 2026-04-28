@@ -37,6 +37,8 @@ export function diagnose(ticker: TickerData, macro: MacroState = CURRENT_MACRO):
     consensus,
     macro,
     isSynthesized: ticker.isSynthesized === true,
+    liveFields: ticker.liveFields ?? [],
+    liveQuote: ticker.liveQuote,
   };
 }
 
